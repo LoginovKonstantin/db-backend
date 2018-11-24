@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import db.DatabaseService;
 import io.javalin.Javalin;
+
 import java.util.Arrays;
 
 import static server.Configuration.SERVER_PORT;
@@ -20,7 +21,13 @@ public class Server {
                 config.getUser(),
                 config.getPass()
         );
-        dbService.tryCreateDatabase(dbService.getDataSource());
+//        dbService.tryDropDatabase(dbService.getDataSource());
+//        dbService.tryCreateDatabase(dbService.getDataSource());
+//        try {
+//            dbService.fillTestDataToDataBase(dbService.getDataSource());
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
 
         Javalin javalin = Javalin
                 .create()
@@ -29,9 +36,8 @@ public class Server {
                 .start();
         System.out.println("Server listen port: " + SERVER_PORT);
 
-        javalin.get("/api/location", ctx -> {
-            ctx.result(sendError("mess", ctx.url(), new Exception("asdf")));
-        });
+        javalin.get("/api/getTables", ctx -> ctx.result(dbService.getTables(dbService.getDataSource())));
+
         javalin.get("/api/group", ctx -> {
             ctx.result(sendError("mess", ctx.url(), new Exception("asdf")));
         });

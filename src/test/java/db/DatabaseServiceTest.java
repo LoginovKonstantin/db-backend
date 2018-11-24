@@ -45,7 +45,7 @@ public class DatabaseServiceTest {
         DataSource ds = dbService.getDataSource();
         dbService.insertIntoLocation(ds, "Russia", "Perm");
         try (Connection conn = dbService.getDataSource().getConnection();
-             PreparedStatement statement = conn.prepareStatement(selectFromLocation)) {
+             PreparedStatement statement = conn.prepareStatement(getLocations)) {
             ResultSet rs = statement.executeQuery();
             rs.next();
             assertEquals("Russia", rs.getString("country"));

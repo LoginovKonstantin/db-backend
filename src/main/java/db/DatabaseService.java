@@ -1,9 +1,9 @@
 package db;
 
-import pojo.Contest;
-import pojo.Judge;
-import pojo.Location;
-import pojo.Organization;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import pojo.*;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -12,6 +12,8 @@ import java.sql.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Map;
 
 import static db.DbRequests.*;
 
@@ -34,7 +36,7 @@ public class DatabaseService {
 
     public synchronized DataSource getDataSource() {
         if (ds == null) {
-            String jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + db;
+            String jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + db + "?useUnicode=true&characterEncoding=UTF-8";
             HikariConfig config = new HikariConfig();
             config.setJdbcUrl(jdbcUrl);
             config.setUsername(user);
@@ -57,8 +59,8 @@ public class DatabaseService {
                 conn.prepareStatement(createContest).execute();
                 conn.prepareStatement(createResult).execute();
                 conn.prepareStatement(createJudge).execute();
-                conn.prepareStatement(createInfringement).execute();
                 conn.prepareStatement(createMember).execute();
+                conn.prepareStatement(createInfringement).execute();
                 System.out.println("Create scheme successfuly");
             } else {
                 System.out.println("Table " + checkTable + " exist and scheme not create");
@@ -76,12 +78,12 @@ public class DatabaseService {
             conn.prepareStatement(dropResultFK).execute();
             conn.prepareStatement(dropJudgeFK1).execute();
             conn.prepareStatement(dropJudgeFK2).execute();
-            conn.prepareStatement(dropInfringFK).execute();
+            conn.prepareStatement(dropInfringementFK1).execute();
+            conn.prepareStatement(dropInfringementFK2).execute();
             conn.prepareStatement(dropMemberFK1).execute();
             conn.prepareStatement(dropMemberFK2).execute();
             conn.prepareStatement(dropMemberFK3).execute();
             conn.prepareStatement(dropMemberFK4).execute();
-            conn.prepareStatement(dropMemberFK5).execute();
             conn.prepareStatement(dropLocation).execute();
             conn.prepareStatement(dropGroup).execute();
             conn.prepareStatement(dropOrganization).execute();
@@ -121,6 +123,23 @@ public class DatabaseService {
         }
     }
 
+    public ArrayList<Location> getLocations(DataSource dataSource) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(getLocations)) {
+            ResultSet rs = statement.executeQuery();
+            ArrayList<Location> locations = new ArrayList<>();
+            while(rs.next()) {
+                int id = rs.getInt("id");
+                String country = rs.getString("country");
+                String city = rs.getString("city");
+                locations.add(new Location(id, country, city));
+            }
+            return locations;
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
     public void insertIntoOrganization(DataSource dataSource, String name, int locationId) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement statement = conn.prepareStatement(insertIntoOrganization)) {
@@ -145,6 +164,23 @@ public class DatabaseService {
         }
     }
 
+    public ArrayList<Organization> getOrganizations(DataSource dataSource) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(getOrganizations)) {
+            ResultSet rs = statement.executeQuery();
+            ArrayList<Organization> organizations = new ArrayList<>();
+            while(rs.next()) {
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
+                int locationId = rs.getInt("id_location");
+                organizations.add(new Organization(id, name, locationId));
+            }
+            return organizations;
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
     //sex 0 - woment 1 - man
     public void insertIntoGroup (DataSource dataSource, int age, int sex, float weight, String rank) {
         try (Connection conn = dataSource.getConnection();
@@ -155,6 +191,25 @@ public class DatabaseService {
             statement.setString(4, rank);
             statement.execute();
             System.out.println("Insert group success");
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    public ArrayList<Group> getGroups(DataSource dataSource) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(getGroups)) {
+            ResultSet rs = statement.executeQuery();
+            ArrayList<Group> groups = new ArrayList<>();
+            while(rs.next()) {
+                int id = rs.getInt("id");
+                int age = rs.getInt("age");
+                int sex = rs.getInt("sex");
+                float weight = rs.getFloat("weight");
+                String rank = rs.getString("rank");
+                groups.add(new Group(id, age, sex, weight, rank));
+            }
+            return groups;
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -187,6 +242,26 @@ public class DatabaseService {
         }
     }
 
+    public ArrayList<Contest> getContests (DataSource dataSource) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(getContests)) {
+            ResultSet rs = statement.executeQuery();
+            ArrayList<Contest> contests = new ArrayList<>();
+            while(rs.next()) {
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
+                Date startDate = rs.getDate("date_start");
+                Date endDate = rs.getDate("date_end");
+                String status = rs.getString("status");
+                int organizationId = rs.getInt("id_organization");
+                contests.add(new Contest(id, name, startDate, endDate, status, organizationId));
+            }
+            return contests;
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
     public void insertIntoJudge  (DataSource dataSource, String secondName, String firstName, String lastName, int organizationId, int contestId) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement statement = conn.prepareStatement(insertIntoJudge)) {
@@ -197,6 +272,26 @@ public class DatabaseService {
             statement.setInt(5, contestId);
             statement.execute();
             System.out.println("Insert judge success");
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    public ArrayList<Judge> getJudges(DataSource dataSource) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(getJudges)) {
+            ResultSet rs = statement.executeQuery();
+            ArrayList<Judge> judges = new ArrayList<>();
+            while(rs.next()) {
+                int id = rs.getInt("id");
+                String secondName = rs.getString("second_name");
+                String firstName = rs.getString("first_name");
+                String lastName = rs.getString("last_name");
+                int organizationId = rs.getInt("id_organization");
+                int contestId = rs.getInt("id_contest");
+                judges.add(new Judge(id, secondName, firstName, lastName, organizationId, contestId));
+            }
+            return judges;
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -216,15 +311,36 @@ public class DatabaseService {
         }
     }
 
-    public void insertIntoInfringement (DataSource dataSource, String description, int judgeId, Date infringementDate, String comment) {
+    public void insertIntoInfringement (DataSource dataSource, String description, Integer judgeId, Date infringementDate, String comment, int idMember) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement statement = conn.prepareStatement(insertIntoInfringement)) {
             statement.setString(1, description);
             statement.setInt(2, judgeId);
             statement.setDate(3, infringementDate);
             statement.setString(4, comment);
+            statement.setInt(5, idMember);
             statement.execute();
             System.out.println("Insert infringement success");
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    public ArrayList<Infringement> getInfringements(DataSource dataSource) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(getInfringements)) {
+            ResultSet rs = statement.executeQuery();
+            ArrayList<Infringement> infringements = new ArrayList<>();
+            while(rs.next()) {
+                int id = rs.getInt("id");
+                String description = rs.getString("description");
+                int judgeId = rs.getInt("id_judge");
+                Date infrDate = rs.getDate("infr_date");
+                String comment = rs.getString("comment");
+                int memberId = rs.getInt("id_member");
+                infringements.add(new Infringement(id, description, judgeId, infrDate, comment, memberId));
+            }
+            return infringements;
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -243,7 +359,25 @@ public class DatabaseService {
         }
     }
 
-    public void insertIntoMember (DataSource dataSource, String secondName, String firstName, String lastName, int number, int contestId, int organizationId, int infringementId, int resultId, int groupId) {
+    public ArrayList<Result> getResults(DataSource dataSource) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(getResults)) {
+            ResultSet rs = statement.executeQuery();
+            ArrayList<Result> results = new ArrayList<>();
+            while(rs.next()) {
+                int id = rs.getInt("id");
+                int contestId = rs.getInt("id_contest");
+                int place = rs.getInt("place");
+                float points = rs.getFloat("points");
+                results.add(new Result(id, contestId, place, points));
+            }
+            return results;
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    public void insertIntoMember (DataSource dataSource, String secondName, String firstName, String lastName, int number, int contestId, int organizationId, int groupId) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement statement = conn.prepareStatement(insertIntoMember)) {
             statement.setString(1, secondName);
@@ -252,11 +386,32 @@ public class DatabaseService {
             statement.setInt(4, number);
             statement.setInt(5, contestId);
             statement.setInt(6, organizationId);
-            statement.setInt(7, infringementId);
-            statement.setInt(8, resultId);
-            statement.setInt(9, groupId);
+            statement.setInt(7, groupId);
             statement.execute();
             System.out.println("Insert result success");
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    public ArrayList<Member> getMembers(DataSource dataSource) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(getMember)) {
+            ResultSet rs = statement.executeQuery();
+            ArrayList<Member> members = new ArrayList<>();
+            while(rs.next()) {
+                int id = rs.getInt("id");
+                String secondName = rs.getString("second_name");
+                String firstName = rs.getString("first_name");
+                String lastName = rs.getString("last_name");
+                int number = rs.getInt("number");
+                int contestId = rs.getInt("id_contest");
+                int organizationId = rs.getInt("id_organization");
+                int resultId = rs.getInt("id_result");
+                int groupId = rs.getInt("id_group");
+                members.add(new Member(id, secondName, firstName, lastName, number, contestId, organizationId, resultId, groupId));
+            }
+            return members;
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -295,10 +450,37 @@ public class DatabaseService {
         insertIntoJudge(ds, "Lesley", "Ann", "Warren", mdrdOrg, secondContest);
         insertIntoJudge(ds, "Barbara ", "Bel", "Geddes", mdrdLocation, secondContest);
 
-        int petrovJudge = getJudgeByName(ds, "Петров", "Максим", "Дмитриевич").getId();
+//        insertIntoInfringement(ds, "Допинг", null, null, null, null);
+//        insertIntoResult(ds, firstContest, 1, 125.5f);
 
-//        insertIntoInfringement(ds, "На");
+        insertIntoMember(ds, "Иванов", "Сергей", "Сергей Владимирович", 10, firstContest, mskOrg, 1);
+        insertIntoMember(ds, "Пушкин", "Александр", "Александрович", 11, firstContest, prmOrg, 1);
+        insertIntoMember(ds, "Красавина", "Екатерина", "Андреевна", 100, firstContest, mskOrg, 2);
+        insertIntoMember(ds, "del", "María", "Amparo", 101, firstContest, mdrdOrg, 2);
+    }
 
+    public String getTables (DataSource ds) {
+        ArrayList<Location> locations = getLocations(ds);
+        ArrayList<Organization> organizations = getOrganizations(ds);
+        ArrayList<Group> groups = getGroups(ds);
+        ArrayList<Contest> contests = getContests(ds);
+        ArrayList<Judge> judges = getJudges(ds);
+        ArrayList<Infringement> infringements = getInfringements(ds);
+        ArrayList<Result> results = getResults(ds);
+        ArrayList<Member> members = getMembers(ds);
+
+        Gson gson = new GsonBuilder().setLenient().create();
+        JsonObject json = new JsonObject();
+        json.add("locations", gson.toJsonTree(locations));
+        json.add("organizations", gson.toJsonTree(organizations));
+        json.add("groups", gson.toJsonTree(groups));
+        json.add("contests", gson.toJsonTree(contests));
+        json.add("judges", gson.toJsonTree(judges));
+        json.add("infringements", gson.toJsonTree(infringements));
+        json.add("results", gson.toJsonTree(results));
+        json.add("members", gson.toJsonTree(members));
+
+        return json.toString();
     }
 }
 
