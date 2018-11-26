@@ -16,7 +16,10 @@ import java.text.ParseException;
 
 import static db.DbRequests.*;
 import static org.testcontainers.containers.MySQLContainer.MYSQL_PORT;
+import static org.testng.Assert.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertFalse;
+import static pojo.Tables.*;
 
 @Test
 public class DatabaseServiceTest {
@@ -69,5 +72,18 @@ public class DatabaseServiceTest {
 //        dbService.insertIntoGroup(dbService.getDataSource(), 18, 1, 85.5f, "MS");
 
 //        DataSource ds = dbService.getDataSource();
+    }
+
+    @Test
+    public void testIsExistTable() {
+        assertTrue(dbService.isExistTable("location"));
+        assertFalse(dbService.isExistTable("locatio1"));
+        assertTrue(dbService.isExistTable(ORGANIZATION.name()));
+        assertTrue(dbService.isExistTable(GROUP.name()));
+        assertTrue(dbService.isExistTable(CONTEST.name()));
+        assertTrue(dbService.isExistTable(JUDGE.name()));
+        assertTrue(dbService.isExistTable(INFRINGEMENT.name()));
+        assertTrue(dbService.isExistTable(RESULT.name()));
+        assertTrue(dbService.isExistTable(MEMBER.name()));
     }
 }

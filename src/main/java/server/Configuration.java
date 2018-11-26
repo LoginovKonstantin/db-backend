@@ -5,6 +5,8 @@ import java.util.*;
 public class Configuration {
 
     static int SERVER_PORT = 3000;
+    static String LOG4J_CONF_PATH = "src/main/resources/log4j.properties";
+    public static String FORMAT_DATE = "dd/MM/yy";
     private String hostDb, nameDb, userDb, passDb;
     private int portDb;
 

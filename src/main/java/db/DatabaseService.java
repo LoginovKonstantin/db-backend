@@ -1,21 +1,33 @@
 package db;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
+import io.javalin.Context;
 import pojo.*;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.sql.Date;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
 
 import static db.DbRequests.*;
+import static pojo.ContestFields.ID_ORGANIZATION;
+import static pojo.ContestFields.NAME;
+import static pojo.LocationFields.*;
+import static pojo.OrganizationFields.*;
+import static pojo.GroupFields.*;
+import static pojo.ContestFields.*;
+import static pojo.InfringementFields.*;
+import static pojo.JudgeFields.*;
+import static pojo.MemberFields.*;
+import static pojo.OrganizationFields.*;
+import static pojo.ResultFields.*;
+import static server.Configuration.FORMAT_DATE;
+import static server.Server.sendError;
+import static server.Server.sendSuccess;
 
 public class DatabaseService {
 
@@ -117,7 +129,7 @@ public class DatabaseService {
             statement.setString(2, city);
             ResultSet rs = statement.executeQuery();
             rs.next();
-            return new Location (rs.getInt("id"), rs.getString("country"), rs.getString("city"));
+            return new Location(rs.getInt("id"), rs.getString("country"), rs.getString("city"));
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -128,7 +140,7 @@ public class DatabaseService {
              PreparedStatement statement = conn.prepareStatement(getLocations)) {
             ResultSet rs = statement.executeQuery();
             ArrayList<Location> locations = new ArrayList<>();
-            while(rs.next()) {
+            while (rs.next()) {
                 int id = rs.getInt("id");
                 String country = rs.getString("country");
                 String city = rs.getString("city");
@@ -169,7 +181,7 @@ public class DatabaseService {
              PreparedStatement statement = conn.prepareStatement(getOrganizations)) {
             ResultSet rs = statement.executeQuery();
             ArrayList<Organization> organizations = new ArrayList<>();
-            while(rs.next()) {
+            while (rs.next()) {
                 int id = rs.getInt("id");
                 String name = rs.getString("name");
                 int locationId = rs.getInt("id_location");
@@ -182,7 +194,7 @@ public class DatabaseService {
     }
 
     //sex 0 - woment 1 - man
-    public void insertIntoGroup (DataSource dataSource, int age, int sex, float weight, String rank) {
+    public void insertIntoGroup(DataSource dataSource, int age, int sex, float weight, String rank) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement statement = conn.prepareStatement(insertIntoGroup)) {
             statement.setInt(1, age);
@@ -201,7 +213,7 @@ public class DatabaseService {
              PreparedStatement statement = conn.prepareStatement(getGroups)) {
             ResultSet rs = statement.executeQuery();
             ArrayList<Group> groups = new ArrayList<>();
-            while(rs.next()) {
+            while (rs.next()) {
                 int id = rs.getInt("id");
                 int age = rs.getInt("age");
                 int sex = rs.getInt("sex");
@@ -215,7 +227,7 @@ public class DatabaseService {
         }
     }
 
-    public void insertIntoContest (DataSource dataSource, String name, Date dateStart, Date dateEnd, String status, int organizationId) {
+    public void insertIntoContest(DataSource dataSource, String name, Date dateStart, Date dateEnd, String status, int organizationId) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement statement = conn.prepareStatement(insertIntoContest)) {
             statement.setString(1, name);
@@ -230,7 +242,7 @@ public class DatabaseService {
         }
     }
 
-    public Contest getContest (DataSource dataSource, String name) {
+    public Contest getContest(DataSource dataSource, String name) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement statement = conn.prepareStatement(getContestByName)) {
             statement.setString(1, name);
@@ -242,12 +254,12 @@ public class DatabaseService {
         }
     }
 
-    public ArrayList<Contest> getContests (DataSource dataSource) {
+    public ArrayList<Contest> getContests(DataSource dataSource) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement statement = conn.prepareStatement(getContests)) {
             ResultSet rs = statement.executeQuery();
             ArrayList<Contest> contests = new ArrayList<>();
-            while(rs.next()) {
+            while (rs.next()) {
                 int id = rs.getInt("id");
                 String name = rs.getString("name");
                 Date startDate = rs.getDate("date_start");
@@ -262,7 +274,7 @@ public class DatabaseService {
         }
     }
 
-    public void insertIntoJudge  (DataSource dataSource, String secondName, String firstName, String lastName, int organizationId, int contestId) {
+    public void insertIntoJudge(DataSource dataSource, String secondName, String firstName, String lastName, int organizationId, int contestId) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement statement = conn.prepareStatement(insertIntoJudge)) {
             statement.setString(1, secondName);
@@ -282,7 +294,7 @@ public class DatabaseService {
              PreparedStatement statement = conn.prepareStatement(getJudges)) {
             ResultSet rs = statement.executeQuery();
             ArrayList<Judge> judges = new ArrayList<>();
-            while(rs.next()) {
+            while (rs.next()) {
                 int id = rs.getInt("id");
                 String secondName = rs.getString("second_name");
                 String firstName = rs.getString("first_name");
@@ -297,7 +309,7 @@ public class DatabaseService {
         }
     }
 
-    public Judge getJudgeByName (DataSource dataSource, String secondName, String firstName, String lastName) {
+    public Judge getJudgeByName(DataSource dataSource, String secondName, String firstName, String lastName) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement statement = conn.prepareStatement(getJudgeByName)) {
             statement.setString(1, secondName);
@@ -311,7 +323,7 @@ public class DatabaseService {
         }
     }
 
-    public void insertIntoInfringement (DataSource dataSource, String description, Integer judgeId, Date infringementDate, String comment, int idMember) {
+    public void insertIntoInfringement(DataSource dataSource, String description, Integer judgeId, Date infringementDate, String comment, int idMember) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement statement = conn.prepareStatement(insertIntoInfringement)) {
             statement.setString(1, description);
@@ -331,7 +343,7 @@ public class DatabaseService {
              PreparedStatement statement = conn.prepareStatement(getInfringements)) {
             ResultSet rs = statement.executeQuery();
             ArrayList<Infringement> infringements = new ArrayList<>();
-            while(rs.next()) {
+            while (rs.next()) {
                 int id = rs.getInt("id");
                 String description = rs.getString("description");
                 int judgeId = rs.getInt("id_judge");
@@ -346,7 +358,7 @@ public class DatabaseService {
         }
     }
 
-    public void insertIntoResult (DataSource dataSource, int contestId, int place, float points) {
+    public void insertIntoResult(DataSource dataSource, int contestId, int place, float points) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement statement = conn.prepareStatement(insertIntoResult)) {
             statement.setInt(1, contestId);
@@ -364,7 +376,7 @@ public class DatabaseService {
              PreparedStatement statement = conn.prepareStatement(getResults)) {
             ResultSet rs = statement.executeQuery();
             ArrayList<Result> results = new ArrayList<>();
-            while(rs.next()) {
+            while (rs.next()) {
                 int id = rs.getInt("id");
                 int contestId = rs.getInt("id_contest");
                 int place = rs.getInt("place");
@@ -377,7 +389,7 @@ public class DatabaseService {
         }
     }
 
-    public void insertIntoMember (DataSource dataSource, String secondName, String firstName, String lastName, int number, int contestId, int organizationId, int groupId) {
+    public void insertIntoMember(DataSource dataSource, String secondName, String firstName, String lastName, int number, int contestId, int organizationId, int groupId) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement statement = conn.prepareStatement(insertIntoMember)) {
             statement.setString(1, secondName);
@@ -399,7 +411,7 @@ public class DatabaseService {
              PreparedStatement statement = conn.prepareStatement(getMember)) {
             ResultSet rs = statement.executeQuery();
             ArrayList<Member> members = new ArrayList<>();
-            while(rs.next()) {
+            while (rs.next()) {
                 int id = rs.getInt("id");
                 String secondName = rs.getString("second_name");
                 String firstName = rs.getString("first_name");
@@ -417,7 +429,7 @@ public class DatabaseService {
         }
     }
 
-    public void fillTestDataToDataBase (DataSource dataSource) throws ParseException {
+    public void fillTestDataToDataBase(DataSource dataSource) throws ParseException {
         DataSource ds = dataSource;
         insertIntoLocation(ds, "Russia", "Perm");
         insertIntoLocation(ds, "Russia", "Moscow");
@@ -438,7 +450,7 @@ public class DatabaseService {
         int prmOrg = getOrganizationByName(ds, "PrmSportSchool").getId();
         int mdrdOrg = getOrganizationByName(ds, "MdrdSportSchool").getId();
 
-        DateFormat formatter = new SimpleDateFormat("dd/MM/yy");
+        DateFormat formatter = new SimpleDateFormat(FORMAT_DATE);
         insertIntoContest(ds, "First Winner Games", new java.sql.Date(formatter.parse("01/01/19").getTime()), new java.sql.Date(formatter.parse("07/01/19").getTime()), "Not started", prmOrg);
         insertIntoContest(ds, "Second Winner Games", new java.sql.Date(formatter.parse("23/02/19").getTime()), new java.sql.Date(formatter.parse("27/02/19").getTime()), "Not started", mdrdOrg);
 
@@ -459,7 +471,7 @@ public class DatabaseService {
         insertIntoMember(ds, "del", "María", "Amparo", 101, firstContest, mdrdOrg, 2);
     }
 
-    public String getTables (DataSource ds) {
+    public String getTables(DataSource ds) {
         ArrayList<Location> locations = getLocations(ds);
         ArrayList<Organization> organizations = getOrganizations(ds);
         ArrayList<Group> groups = getGroups(ds);
@@ -469,18 +481,120 @@ public class DatabaseService {
         ArrayList<Result> results = getResults(ds);
         ArrayList<Member> members = getMembers(ds);
 
-        Gson gson = new GsonBuilder().setLenient().create();
-        JsonObject json = new JsonObject();
-        json.add("locations", gson.toJsonTree(locations));
-        json.add("organizations", gson.toJsonTree(organizations));
-        json.add("groups", gson.toJsonTree(groups));
-        json.add("contests", gson.toJsonTree(contests));
-        json.add("judges", gson.toJsonTree(judges));
-        json.add("infringements", gson.toJsonTree(infringements));
-        json.add("results", gson.toJsonTree(results));
-        json.add("members", gson.toJsonTree(members));
+        Map<String ,Object> result = new HashMap<>();
+        result.put("locations", locations);
+        result.put("organizations", organizations);
+        result.put("groups", groups);
+        result.put("contests", contests);
+        result.put("judges", judges);
+        result.put("infringements", infringements);
+        result.put("results", results);
+        result.put("members", members);
 
-        return json.toString();
+        return sendSuccess(result);
     }
+
+    boolean isExistTable(String table) {
+        for (Tables c : Tables.values()) {
+            if (c.name().equalsIgnoreCase(table)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isInsertedInTable(String table, Context ctx, DataSource ds) throws ParseException {
+        boolean insert = false;
+        Map<String, String[]> params = ctx.formParamMap();
+        Set<String> fields = params.keySet();
+        switch (Tables.valueOf(table.toUpperCase())) {
+            case LOCATION:
+                String city = CITY.name().toLowerCase();
+                String country = COUNTRY.name().toLowerCase();
+                if(fields.contains(city) && fields.contains(country)) {
+                    String addCountry = ctx.formParam("country");
+                    String addCity = ctx.formParam("city");
+                    insertIntoLocation(ds, addCountry, addCity);
+                    insert = true;
+                }
+                break;
+            case ORGANIZATION:
+                String name = NAME.name().toLowerCase();
+                String idLocation = ID_LOCATION.name().toLowerCase();
+                if(fields.contains(name) && fields.contains(idLocation)) {
+                    String addName = ctx.formParam("name");
+                    int addIdLocation = Integer.parseInt(Objects.requireNonNull(ctx.formParam("id_location")));
+                    insertIntoOrganization(ds, addName, addIdLocation);
+                    insert = true;
+                }
+                break;
+            case GROUP:
+                String age = AGE.name().toLowerCase();
+                String sex = SEX.name().toLowerCase();
+                String weight = WEIGHT.name().toLowerCase();
+                String rank = RANK.name().toLowerCase();
+                if(fields.contains(age) && fields.contains(sex) && fields.contains(weight) && fields.contains(rank)) {
+                    int addAge = Integer.parseInt(Objects.requireNonNull(ctx.formParam("age")));
+                    int addSex = Integer.parseInt(Objects.requireNonNull(ctx.formParam("sex")));
+                    float addWeight = Float.parseFloat(Objects.requireNonNull(ctx.formParam("weight")));
+                    String addRank = ctx.formParam("rank");
+                    insertIntoGroup(ds, addAge, addSex, addWeight, addRank);
+                    insert = true;
+                }
+                break;
+            case CONTEST:
+                String dateStart = DATE_START.name().toLowerCase();
+                String dateEnd = DATE_END.name().toLowerCase();
+                String status = STATUS.name().toLowerCase();
+                String organizationIdContest = ContestFields.ID_ORGANIZATION.name().toLowerCase();
+                String nameContest = ContestFields.NAME.name().toLowerCase();
+                if(
+                    fields.contains(dateStart) &&
+                    fields.contains(dateEnd) &&
+                    fields.contains(status) &&
+                    fields.contains(organizationIdContest) &&
+                    fields.contains(nameContest)
+                ) {
+                    DateFormat formatter = new SimpleDateFormat(FORMAT_DATE);
+                    Date addDateStart = new java.sql.Date(formatter.parse(ctx.formParam("date_start")).getTime());
+                    Date addDateEnd = new java.sql.Date(formatter.parse(ctx.formParam("date_end")).getTime());
+                    String addStatus = ctx.formParam("status");
+                    int addOrganizationId = Integer.parseInt(Objects.requireNonNull(ctx.formParam("id_organization")));
+                    String addName = ctx.formParam("name");
+                    insertIntoContest(ds, addName, addDateStart, addDateEnd, addStatus, addOrganizationId);
+                    insert = true;
+                }
+                break;
+                //// с датой чет, проверить еще
+            case JUDGE:
+                break;
+            case INFRINGEMENT:
+                break;
+            case RESULT:
+                break;
+            case MEMBER:
+                break;
+        }
+        if(!insert) System.out.println("ERROR: Insert error, fields " + fields.toString());
+        return insert;
+    }
+
+    public String addEntity(DataSource ds, Context ctx) {
+        String table = ctx.formParam("table");
+        if(!isExistTable(table)) {
+            return sendError("Table " + table + " not exist", ctx.url(), null);
+        }
+        try {
+            if(!isInsertedInTable(table, ctx, ds)) {
+                return sendError("Insert in table " + table + " failed", ctx.url(), null);
+            } else {
+                return sendSuccess("");
+            }
+        } catch (ParseException e) {
+            System.out.println("Maybe DATE_START or DATE END incorrect....");
+            throw new RuntimeException(e);
+        }
+    }
+
 }
 
