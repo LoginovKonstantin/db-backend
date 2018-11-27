@@ -35,7 +35,7 @@ public class Server {
         Javalin javalin = Javalin
                 .create()
                 .port(SERVER_PORT)
-                .enableStaticFiles("/public")
+                .enableStaticFiles("/client/react-redux/dist/")
                 .start();
         System.out.println("Server listen port: " + SERVER_PORT);
 
@@ -45,7 +45,11 @@ public class Server {
         //отобразить топ
         //предсказывать победителей
 
-        javalin.get("*", ctx -> ctx.renderThymeleaf("/public/index.html"));
+        Arrays.asList("/add", "/correct", "/remove").forEach(path ->
+            javalin.get(path, ctx -> ctx.renderThymeleaf("/client/react-redux/dist/index.html"))
+        );
+
+        javalin.get("/add", ctx -> ctx.renderThymeleaf("/public/index.html"));
     }
 
     public static String sendSuccess(Object obj) {
