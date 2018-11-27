@@ -509,8 +509,7 @@ public class DatabaseService {
         Set<String> fields = params.keySet();
         switch (Tables.valueOf(table.toUpperCase())) {
             case LOCATION:
-                String city = CITY.name().toLowerCase();
-                String country = COUNTRY.name().toLowerCase();
+                String city = getLowStr(CITY), country = getLowStr(COUNTRY);
                 if(fields.contains(city) && fields.contains(country)) {
                     String addCountry = ctx.formParam("country");
                     String addCity = ctx.formParam("city");
@@ -519,8 +518,7 @@ public class DatabaseService {
                 }
                 break;
             case ORGANIZATION:
-                String name = NAME.name().toLowerCase();
-                String idLocation = ID_LOCATION.name().toLowerCase();
+                String name = getLowStr(NAME), idLocation = getLowStr(ID_LOCATION);
                 if(fields.contains(name) && fields.contains(idLocation)) {
                     String addName = ctx.formParam("name");
                     int addIdLocation = Integer.parseInt(Objects.requireNonNull(ctx.formParam("id_location")));
@@ -529,10 +527,7 @@ public class DatabaseService {
                 }
                 break;
             case GROUP:
-                String age = AGE.name().toLowerCase();
-                String sex = SEX.name().toLowerCase();
-                String weight = WEIGHT.name().toLowerCase();
-                String rank = RANK.name().toLowerCase();
+                String age = getLowStr(AGE), sex = getLowStr(SEX), weight = getLowStr(WEIGHT), rank = getLowStr(RANK);
                 if(fields.contains(age) && fields.contains(sex) && fields.contains(weight) && fields.contains(rank)) {
                     int addAge = Integer.parseInt(Objects.requireNonNull(ctx.formParam("age")));
                     int addSex = Integer.parseInt(Objects.requireNonNull(ctx.formParam("sex")));
@@ -543,11 +538,8 @@ public class DatabaseService {
                 }
                 break;
             case CONTEST:
-                String dateStart = DATE_START.name().toLowerCase();
-                String dateEnd = DATE_END.name().toLowerCase();
-                String status = STATUS.name().toLowerCase();
-                String organizationIdContest = ContestFields.ID_ORGANIZATION.name().toLowerCase();
-                String nameContest = ContestFields.NAME.name().toLowerCase();
+                String dateStart = getLowStr(DATE_START), dateEnd = getLowStr(DATE_END);
+                String status = getLowStr(STATUS), organizationIdContest = getLowStr(ContestFields.ID_ORGANIZATION), nameContest = getLowStr(ContestFields.NAME);
                 if(
                     fields.contains(dateStart) &&
                     fields.contains(dateEnd) &&
@@ -564,19 +556,97 @@ public class DatabaseService {
                     insertIntoContest(ds, addName, addDateStart, addDateEnd, addStatus, addOrganizationId);
                     insert = true;
                 }
-                break;
                 //// с датой чет, проверить еще
+                break;
             case JUDGE:
+                String secondName = getLowStr(JudgeFields.SECOND_NAME), fisrtName = getLowStr(JudgeFields.FIRST_NAME);
+                String lastName = getLowStr(JudgeFields.LAST_NAME), organizationId = getLowStr(JudgeFields.ID_ORGANIZATION);
+                String contestId = getLowStr(JudgeFields.ID_CONTEST);
+                if(
+                    fields.contains(secondName) &&
+                    fields.contains(lastName) &&
+                    fields.contains(fisrtName) &&
+                    fields.contains(contestId) &&
+                    fields.contains(organizationId)
+                ) {
+                    String addSecondName = ctx.formParam("second_name");
+                    String addFirstName = ctx.formParam("first_name");
+                    String addLastName = ctx.formParam("last_name");
+                    int addOrganizationId = Integer.parseInt(Objects.requireNonNull(ctx.formParam("organization_id")));
+                    int addContestId = Integer.parseInt(Objects.requireNonNull(ctx.formParam("contest_id")));
+                    insertIntoJudge(ds, addSecondName, addFirstName, addLastName, addOrganizationId, addContestId);
+                    insert = true;
+                }
                 break;
             case INFRINGEMENT:
+                String description = getLowStr(DESCRIPTION), judgeId = getLowStr(InfringementFields.ID_JUDGE);
+                String infrDate = getLowStr(INFR_DATE), comment = getLowStr(COMMENT);
+                String memberIdInfr = getLowStr(ID_MEMBER);
+                if(
+                    fields.contains(description) &&
+                    fields.contains(judgeId) &&
+                    fields.contains(comment) &&
+                    fields.contains(infrDate) &&
+                    fields.contains(memberIdInfr)
+                ) {
+                    String addDescription = ctx.formParam("description");
+                    int addJudgeId = Integer.parseInt(Objects.requireNonNull(ctx.formParam("id_judge")));
+                    DateFormat formatter = new SimpleDateFormat(FORMAT_DATE);
+                    Date addInfrDateInfr = new java.sql.Date(formatter.parse(ctx.formParam("infr_date")).getTime());
+                    String addComment = ctx.formParam("comment");
+                    int addIdMemberInfr = Integer.parseInt(Objects.requireNonNull(ctx.formParam("id_member")));
+                    insertIntoInfringement(ds, addDescription, addJudgeId, addInfrDateInfr, addComment, addIdMemberInfr);
+                    insert = true;
+                }
                 break;
             case RESULT:
+                String contestIdResult = getLowStr(ResultFields.ID_CONTEST);
+                String place = getLowStr(PLACE), points = getLowStr(POINTS);
+                if(fields.contains(contestIdResult) && fields.contains(place) && fields.contains(points)) {
+                    int addContestIdResult = Integer.parseInt(Objects.requireNonNull(ctx.formParam("id_contest")));
+                    int addPlace = Integer.parseInt(Objects.requireNonNull(ctx.formParam("place")));
+                    float addPoints = Float.parseFloat(Objects.requireNonNull(ctx.formParam("points")));
+                    insertIntoResult(ds, addContestIdResult, addPlace, addPoints);
+                    insert = true;
+                }
                 break;
             case MEMBER:
+                String secondNameMember = getLowStr(MemberFields.SECOND_NAME);
+                String firstNameMember = getLowStr(MemberFields.FIRST_NAME);
+                String lastNameMember = getLowStr(MemberFields.LAST_NAME);
+                String number = getLowStr(NUMBER), idGroup = getLowStr(MemberFields.ID_GROUP);
+                String idContest = getLowStr(MemberFields.ID_CONTEST);
+                String idOrganization = getLowStr(MemberFields.ID_ORGANIZATION);
+                String idResult = getLowStr(MemberFields.ID_RESULT);
+                if(
+                    fields.contains(secondNameMember) &&
+                    fields.contains(firstNameMember) &&
+                    fields.contains(lastNameMember) &&
+                    fields.contains(number) &&
+                    fields.contains(idContest) &&
+                    fields.contains(idOrganization) &&
+                    fields.contains(idGroup) &&
+                    fields.contains(idResult)
+                ) {
+                    String addSecondNameMember = ctx.formParam("second_name");
+                    String addFirstNameMember = ctx.formParam("first_name");
+                    String addLastNameMember = ctx.formParam("last_name");
+                    int addNumberMember = Integer.parseInt(Objects.requireNonNull(ctx.formParam("number")));
+                    int addContestIdMember = Integer.parseInt(Objects.requireNonNull(ctx.formParam("id_contest")));
+                    int addOrganizationIdMember = Integer.parseInt(Objects.requireNonNull(ctx.formParam("id_organization")));
+                    int addResultIdMember = Integer.parseInt(Objects.requireNonNull(ctx.formParam("id_result")));
+                    int addGroupIdMember = Integer.parseInt(Objects.requireNonNull(ctx.formParam("id_group")));
+                    insertIntoMember(ds, addSecondNameMember, addFirstNameMember, addLastNameMember,
+                            addNumberMember, addContestIdMember, addOrganizationIdMember, addGroupIdMember);
+                    insert = true;
+                }
                 break;
         }
         if(!insert) System.out.println("ERROR: Insert error, fields " + fields.toString());
         return insert;
+    }
+    static String getLowStr(Enum e) {
+        return e.name().toLowerCase();
     }
 
     public String addEntity(DataSource ds, Context ctx) {
