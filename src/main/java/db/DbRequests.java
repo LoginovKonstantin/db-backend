@@ -131,38 +131,47 @@ class DbRequests {
      */
     // TABLE LOCATION
     static String insertIntoLocation = "INSERT INTO location (country, city) VALUES (?, ?);";
+    static String updateLocation = "UPDATE location SET country = ?, city = ? WHERE id = ? ";
     static String getLocations = "SELECT * FROM location";
     static String getLocationByCountryAndCity = "SELECT * FROM location where country = ? and city = ?;";
 
     //TABLE ORGANIZATION
     static String insertIntoOrganization = "INSERT INTO organization (name, id_location) VALUES (?, ?);";
+    static String updateOrganization = "UPDATE organization set name = ?, id_location =? WHERE id = ?;";
     static String getOrganizations = "SELECT * FROM organization";
     static String getOrganizationByName = "SELECT * FROM organization where name = ?;";
 
     //TABLE GROUP (таблице group выбрано не удачное имя, т.к. оно зарезервировано в mysql, обход - `group`, вместо group)
     static String insertIntoGroup = "INSERT INTO `group` (age, sex, weight, rank) VALUES (?, ?, ?, ?);";
+    static String updateGroup = "UPDATE `group` SET age = ?, sex = ?, weight = ?, rank = ? WHERE id = ?;";
     static String getGroups = "SELECT * FROM `group`";
 
     //TABLE CONTEST
     static String insertIntoContest = "INSERT INTO contest (name, date_start, date_end, status, id_organization) VALUES (?, ?, ?, ?, ?);";
+    static String updateContest = "UPDATE contest SET name = ?, date_start = ?, date_end = ?, status = ?, id_organization = ? WHERE id = ?;";
     static String getContestByName = "SELECT * FROM contest WHERE name = ?;";
     static String getContests = "SELECT * FROM contest";
 
     //TABLE JUDGE
     static String insertIntoJudge = "INSERT INTO judge (second_name, first_name, last_name, id_organization, id_contest) VALUES (?, ?, ?, ?, ?);";
+    static String updateJudge = "UPDATE judge SET second_name = ?, first_name = ?, last_name = ?, id_organization = ?, id_contest = ? WHERE id = ?;";
     static String getJudgeByName = "SELECT * FROM judge WHERE second_name = ? and first_name = ? and last_name =?";
     static String getJudges = "SELECT * FROM judge";
 
     //TABLE INFRINGEMENT
     static String insertIntoInfringement = "INSERT INTO infringement (description, id_judge, infr_date, comment, id_member) VALUES (?, ?, ?, ?, ?);";
+    static String updateInfringement = "UPDATE infringement SET description = ?, id_judge = ?, infr_date = ?, comment = ?, id_member = ? WHERE id = ?;";
     static String getInfringements = "SELECT * FROM infringement";
 
     //TABLE RESULT
     static String insertIntoResult = "INSERT INTO result(id_contest, place, points) VALUES (?, ?, ?, ?, ?);";
+    static String updateResult = "UPDATE result SET id_contest = ?, place = ?, points = ? WHERE id = ?;";
     static String getResults = "SELECT * FROM result";
 
     //TABLE MEMBER
     static String insertIntoMember = "INSERT INTO member (second_name, first_name, last_name, number, id_contest, id_organization, id_group) VALUES (?, ?, ?, ?, ?, ?, ?);";
+    static String updateMember = "UPDATE member SET second_name = ?, first_name = ?, last_name = ?, number = ?, id_contest = ?, id_organization = ?, id_group = ?, id_result = ? WHERE id = ?;";
+    static String updateMemberWithoutResult = "UPDATE member SET second_name = ?, first_name = ?, last_name = ?, number = ?, id_contest = ?, id_organization = ?, id_group = ? WHERE id = ?;";
     static String getMember = "SELECT * FROM member";
 
 }
