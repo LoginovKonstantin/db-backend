@@ -164,7 +164,7 @@ class DbRequests {
     static String getInfringements = "SELECT * FROM infringement";
 
     //TABLE RESULT
-    static String insertIntoResult = "INSERT INTO result(id_contest, place, points) VALUES (?, ?, ?, ?, ?);";
+    static String insertIntoResult = "INSERT INTO result(id_contest, place, points) VALUES (?, ?, ?);";
     static String updateResult = "UPDATE result SET id_contest = ?, place = ?, points = ? WHERE id = ?;";
     static String getResults = "SELECT * FROM result";
 

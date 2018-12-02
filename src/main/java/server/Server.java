@@ -47,7 +47,7 @@ public class Server {
         //отобразить топ
         //предсказывать победителей
 
-        Arrays.asList("/add", "/correct", "/remove").forEach(path ->
+        Arrays.asList("/add", "/edit/:table/:id", "/remove").forEach(path ->
             javalin.get(path, ctx -> ctx.renderThymeleaf("/client/react-redux/dist/index.html"))
         );
 

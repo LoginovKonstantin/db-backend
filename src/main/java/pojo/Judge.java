@@ -4,7 +4,7 @@ public class Judge {
     private int id, organizationId, contestId;
     private String firstName, secondName, lastName;
 
-    public Judge(int id, String firstName, String secondName, String lastName, int organizationId, int contestId) {
+    public Judge(int id, String secondName, String firstName, String lastName, int organizationId, int contestId) {
         this.id = id;
         this.organizationId = organizationId;
         this.contestId = contestId;

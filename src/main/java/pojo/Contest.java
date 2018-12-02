@@ -7,7 +7,7 @@ public class Contest {
     private String name, status;
     private Date startDate, endDate;
 
-    public Contest(int id, String name, Date endDate, Date startDate, String status, int organizationId) {
+    public Contest(int id, String name, Date startDate, Date endDate, String status, int organizationId) {
         this.id = id;
         this.organizationId = organizationId;
         this.name = name;

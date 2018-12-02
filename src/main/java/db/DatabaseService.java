@@ -701,8 +701,8 @@ public class DatabaseService {
                     String addSecondName = gson.fromJson(json.get("second_name"), String.class);
                     String addFirstName = gson.fromJson(json.get("first_name"), String.class);
                     String addLastName = gson.fromJson(json.get("last_name"), String.class);
-                    int addOrganizationId = gson.fromJson(json.get("organization_id"), Integer.class);
-                    int addContestId = gson.fromJson(json.get("contest_id"), Integer.class);
+                    int addOrganizationId = gson.fromJson(json.get("id_organization"), Integer.class);
+                    int addContestId = gson.fromJson(json.get("id_contest"), Integer.class);
                     insertIntoJudge(ds, addSecondName, addFirstName, addLastName, addOrganizationId, addContestId);
                     insert = true;
                 }
@@ -730,6 +730,9 @@ public class DatabaseService {
             case RESULT:
                 String contestIdResult = getLowStr(ResultFields.ID_CONTEST);
                 String place = getLowStr(ResultFields.PLACE), points = getLowStr(ResultFields.POINTS);
+                System.out.println(fields.contains(contestIdResult) && fields.contains(place) && fields.contains(points));
+                System.out.println(fields.contains(contestIdResult));
+                System.out.println(fields.toString());
                 if(fields.contains(contestIdResult) && fields.contains(place) && fields.contains(points)) {
                     int addContestIdResult = gson.fromJson(json.get("id_contest"), Integer.class);
                     int addPlace = gson.fromJson(json.get("place"), Integer.class);
@@ -845,8 +848,8 @@ public class DatabaseService {
                 && fields.contains(organizationId) && fields.contains(name) && fields.contains(status)) {
             int updId = gson.fromJson(json.get("id"), Integer.class);
             int updOrganizationId = gson.fromJson(json.get("id_organization"), Integer.class);
-            Date updDateStart = new java.sql.Date(formatter.parse(gson.fromJson(json.get("date_start"), String.class)).getTime() + DAY);
-            Date updDateEnd = new java.sql.Date(formatter.parse(gson.fromJson(json.get("date_end"), String.class)).getTime() + DAY);
+            Date updDateStart = new java.sql.Date(formatter.parse(gson.fromJson(json.get("date_start"), String.class)).getTime());
+            Date updDateEnd = new java.sql.Date(formatter.parse(gson.fromJson(json.get("date_end"), String.class)).getTime());
             String updStatus = gson.fromJson(json.get("status"), String.class);
             String updName = gson.fromJson(json.get("name"), String.class);
             updateContest(ds, updId, updName, updDateStart, updDateEnd, updStatus, updOrganizationId);
@@ -950,7 +953,7 @@ public class DatabaseService {
             case RESULT: updResult(json, gson, ds); break;
             case MEMBER: updMember(json, gson, ds); break;
         }
-        return sendSuccess("");
+        return sendSuccess("update");
     }
 }
 
