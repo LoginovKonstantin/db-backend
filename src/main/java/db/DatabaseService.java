@@ -17,18 +17,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static db.DbRequests.*;
-import static pojo.ContestFields.ID_ORGANIZATION;
-import static pojo.ContestFields.NAME;
-import static pojo.LocationFields.*;
-import static pojo.OrganizationFields.*;
-import static pojo.GroupFields.*;
-import static pojo.ContestFields.*;
-import static pojo.InfringementFields.*;
-import static pojo.JudgeFields.*;
-import static pojo.MemberFields.*;
-import static pojo.OrganizationFields.*;
-import static pojo.ResultFields.*;
-import static server.Configuration.DAY;
 import static server.Configuration.FORMAT_DATE;
 import static server.Server.sendError;
 import static server.Server.sendSuccess;
@@ -170,6 +158,16 @@ public class DatabaseService {
         }
     }
 
+    private void removeLocation(DataSource dataSource, int id) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(removeLocation)) {
+            statement.setInt(1, id);
+            statement.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
     public void insertIntoOrganization(DataSource dataSource, String name, int locationId) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement statement = conn.prepareStatement(insertIntoOrganization)) {
@@ -181,6 +179,7 @@ public class DatabaseService {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
+
     private void updateOrganization(DataSource dataSource, int id, String name, int locationId) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement statement = conn.prepareStatement(updateOrganization)) {
@@ -223,6 +222,16 @@ public class DatabaseService {
         }
     }
 
+    private void removeOrganization(DataSource dataSource, int id) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(removeOrganization)) {
+            statement.setInt(1, id);
+            statement.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
     //sex 0 - woment 1 - man
     private void insertIntoGroup(DataSource dataSource, int age, int sex, float weight, String rank) {
         try (Connection conn = dataSource.getConnection();
@@ -237,6 +246,7 @@ public class DatabaseService {
             throw new RuntimeException(e.getMessage(), e);
         }
     }
+
     private void updateGroup(DataSource dataSource, int id, int age, int sex, float weight, String rank) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement statement = conn.prepareStatement(updateGroup)) {
@@ -266,6 +276,16 @@ public class DatabaseService {
                 groups.add(new Group(id, age, sex, weight, rank));
             }
             return groups;
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    private void removeGroup(DataSource dataSource, int id) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(removeGroup)) {
+            statement.setInt(1, id);
+            statement.execute();
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -329,6 +349,16 @@ public class DatabaseService {
                 contests.add(new Contest(id, name, startDate, endDate, status, organizationId));
             }
             return contests;
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    private void removeContest(DataSource dataSource, int id) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(removeContest)) {
+            statement.setInt(1, id);
+            statement.execute();
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -399,6 +429,16 @@ public class DatabaseService {
         }
     }
 
+    private void removeJudge(DataSource dataSource, int id) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(removeJudge)) {
+            statement.setInt(1, id);
+            statement.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
     private void insertIntoInfringement(DataSource dataSource, String description, Integer judgeId, Date infringementDate, String comment, int idMember) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement statement = conn.prepareStatement(insertIntoInfringement)) {
@@ -450,6 +490,16 @@ public class DatabaseService {
         }
     }
 
+    private void removeInfringement(DataSource dataSource, int id) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(removeInfringement)) {
+            statement.setInt(1, id);
+            statement.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
     private void insertIntoResult(DataSource dataSource, int contestId, int place, float points) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement statement = conn.prepareStatement(insertIntoResult)) {
@@ -495,6 +545,16 @@ public class DatabaseService {
         }
     }
 
+    private void removeResult(DataSource dataSource, int id) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(removeResult)) {
+            statement.setInt(1, id);
+            statement.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
     private void insertIntoMember(DataSource dataSource, String secondName, String firstName, String lastName, int number, int contestId, int organizationId, int groupId) {
         try (Connection conn = dataSource.getConnection();
              PreparedStatement statement = conn.prepareStatement(insertIntoMember)) {
@@ -523,7 +583,7 @@ public class DatabaseService {
             statement.setInt(5, contestId);
             statement.setInt(6, organizationId);
             statement.setInt(7, groupId);
-            if(resultId != null) {
+            if (resultId != null) {
                 statement.setInt(8, resultId);
                 statement.setInt(9, id);
             } else {
@@ -531,6 +591,17 @@ public class DatabaseService {
             }
             statement.execute();
             System.out.println("Update result success");
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+
+    private void removeMember(DataSource dataSource, int id) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(removeMember)) {
+            statement.setInt(1, id);
+            statement.execute();
+            System.out.println("Remove member success");
         } catch (SQLException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -611,7 +682,7 @@ public class DatabaseService {
         ArrayList<Result> results = getResults(ds);
         ArrayList<Member> members = getMembers(ds);
 
-        Map<String ,Object> result = new HashMap<>();
+        Map<String, Object> result = new HashMap<>();
         result.put("locations", locations);
         result.put("organizations", organizations);
         result.put("groups", groups);
@@ -639,7 +710,7 @@ public class DatabaseService {
         switch (Tables.valueOf(table.toUpperCase())) {
             case LOCATION:
                 String city = getLowStr(LocationFields.CITY), country = getLowStr(LocationFields.COUNTRY);
-                if(fields.contains(city) && fields.contains(country)) {
+                if (fields.contains(city) && fields.contains(country)) {
                     String addCountry = gson.fromJson(json.get("country"), String.class);
                     String addCity = gson.fromJson(json.get("city"), String.class);
                     insertIntoLocation(ds, addCountry, addCity);
@@ -648,7 +719,7 @@ public class DatabaseService {
                 break;
             case ORGANIZATION:
                 String name = getLowStr(OrganizationFields.NAME), idLocation = getLowStr(OrganizationFields.ID_LOCATION);
-                if(fields.contains(name) && fields.contains(idLocation)) {
+                if (fields.contains(name) && fields.contains(idLocation)) {
                     String addName = gson.fromJson(json.get("name"), String.class);
                     int addIdLocation = gson.fromJson(json.get("id_location"), Integer.class);
                     insertIntoOrganization(ds, addName, addIdLocation);
@@ -658,7 +729,7 @@ public class DatabaseService {
             case GROUP:
                 String age = getLowStr(GroupFields.AGE), sex = getLowStr(GroupFields.SEX),
                         weight = getLowStr(GroupFields.WEIGHT), rank = getLowStr(GroupFields.RANK);
-                if(fields.contains(age) && fields.contains(sex) && fields.contains(weight) && fields.contains(rank)) {
+                if (fields.contains(age) && fields.contains(sex) && fields.contains(weight) && fields.contains(rank)) {
                     int addAge = gson.fromJson(json.get("age"), Integer.class);
                     int addSex = gson.fromJson(json.get("sex"), Integer.class);
                     float addWeight = gson.fromJson(json.get("weight"), Float.class);
@@ -671,15 +742,15 @@ public class DatabaseService {
                 String dateStart = getLowStr(ContestFields.DATE_START), dateEnd = getLowStr(ContestFields.DATE_END);
                 String status = getLowStr(ContestFields.STATUS), organizationIdContest = getLowStr(ContestFields.ID_ORGANIZATION),
                         nameContest = getLowStr(ContestFields.NAME);
-                if(
-                    fields.contains(dateStart) &&
-                    fields.contains(dateEnd) &&
-                    fields.contains(status) &&
-                    fields.contains(organizationIdContest) &&
-                    fields.contains(nameContest)
-                ) {
-                    Date addDateStart = new java.sql.Date(formatter.parse(gson.fromJson(json.get("date_start"), String.class)).getTime() + DAY);
-                    Date addDateEnd = new java.sql.Date(formatter.parse(gson.fromJson(json.get("date_end"), String.class)).getTime() + DAY);
+                if (
+                        fields.contains(dateStart) &&
+                                fields.contains(dateEnd) &&
+                                fields.contains(status) &&
+                                fields.contains(organizationIdContest) &&
+                                fields.contains(nameContest)
+                        ) {
+                    Date addDateStart = new java.sql.Date(formatter.parse(gson.fromJson(json.get("date_start"), String.class)).getTime());
+                    Date addDateEnd = new java.sql.Date(formatter.parse(gson.fromJson(json.get("date_end"), String.class)).getTime());
                     String addStatus = gson.fromJson(json.get("status"), String.class);
                     int addOrganizationId = gson.fromJson(json.get("id_organization"), Integer.class);
                     String addName = gson.fromJson(json.get("name"), String.class);
@@ -691,13 +762,13 @@ public class DatabaseService {
                 String secondName = getLowStr(JudgeFields.SECOND_NAME), fisrtName = getLowStr(JudgeFields.FIRST_NAME);
                 String lastName = getLowStr(JudgeFields.LAST_NAME), organizationId = getLowStr(JudgeFields.ID_ORGANIZATION);
                 String contestId = getLowStr(JudgeFields.ID_CONTEST);
-                if(
-                    fields.contains(secondName) &&
-                    fields.contains(lastName) &&
-                    fields.contains(fisrtName) &&
-                    fields.contains(contestId) &&
-                    fields.contains(organizationId)
-                ) {
+                if (
+                        fields.contains(secondName) &&
+                                fields.contains(lastName) &&
+                                fields.contains(fisrtName) &&
+                                fields.contains(contestId) &&
+                                fields.contains(organizationId)
+                        ) {
                     String addSecondName = gson.fromJson(json.get("second_name"), String.class);
                     String addFirstName = gson.fromJson(json.get("first_name"), String.class);
                     String addLastName = gson.fromJson(json.get("last_name"), String.class);
@@ -711,16 +782,16 @@ public class DatabaseService {
                 String description = getLowStr(InfringementFields.DESCRIPTION), judgeId = getLowStr(InfringementFields.ID_JUDGE);
                 String infrDate = getLowStr(InfringementFields.INFR_DATE), comment = getLowStr(InfringementFields.COMMENT);
                 String memberIdInfr = getLowStr(InfringementFields.ID_MEMBER);
-                if(
-                    fields.contains(description) &&
-                    fields.contains(judgeId) &&
-                    fields.contains(comment) &&
-                    fields.contains(infrDate) &&
-                    fields.contains(memberIdInfr)
-                ) {
+                if (
+                        fields.contains(description) &&
+                                fields.contains(judgeId) &&
+                                fields.contains(comment) &&
+                                fields.contains(infrDate) &&
+                                fields.contains(memberIdInfr)
+                        ) {
                     String addDescription = gson.fromJson(json.get("description"), String.class);
                     String addComment = gson.fromJson(json.get("comment"), String.class);
-                    Date addInfrDateInfr = new java.sql.Date(formatter.parse(gson.fromJson(json.get("infr_date"), String.class)).getTime() + DAY);
+                    Date addInfrDateInfr = new java.sql.Date(formatter.parse(gson.fromJson(json.get("infr_date"), String.class)).getTime());
                     int addJudgeId = gson.fromJson(json.get("id_judge"), Integer.class);
                     int addIdMemberInfr = gson.fromJson(json.get("id_member"), Integer.class);
                     insertIntoInfringement(ds, addDescription, addJudgeId, addInfrDateInfr, addComment, addIdMemberInfr);
@@ -733,7 +804,7 @@ public class DatabaseService {
                 System.out.println(fields.contains(contestIdResult) && fields.contains(place) && fields.contains(points));
                 System.out.println(fields.contains(contestIdResult));
                 System.out.println(fields.toString());
-                if(fields.contains(contestIdResult) && fields.contains(place) && fields.contains(points)) {
+                if (fields.contains(contestIdResult) && fields.contains(place) && fields.contains(points)) {
                     int addContestIdResult = gson.fromJson(json.get("id_contest"), Integer.class);
                     int addPlace = gson.fromJson(json.get("place"), Integer.class);
                     float addPoints = gson.fromJson(json.get("points"), Float.class);
@@ -749,16 +820,16 @@ public class DatabaseService {
                 String idContest = getLowStr(MemberFields.ID_CONTEST);
                 String idOrganization = getLowStr(MemberFields.ID_ORGANIZATION);
                 //String idResult = getLowStr(MemberFields.ID_RESULT);
-                if(
-                    fields.contains(secondNameMember) &&
-                    fields.contains(firstNameMember) &&
-                    fields.contains(lastNameMember) &&
-                    fields.contains(number) &&
-                    fields.contains(idContest) &&
-                    fields.contains(idOrganization) &&
-                    fields.contains(idGroup)
+                if (
+                        fields.contains(secondNameMember) &&
+                                fields.contains(firstNameMember) &&
+                                fields.contains(lastNameMember) &&
+                                fields.contains(number) &&
+                                fields.contains(idContest) &&
+                                fields.contains(idOrganization) &&
+                                fields.contains(idGroup)
                     //fields.contains(idResult)
-                ) {
+                        ) {
                     String addSecondNameMember = gson.fromJson(json.get("second_name"), String.class);
                     String addFirstNameMember = gson.fromJson(json.get("first_name"), String.class);
                     String addLastNameMember = gson.fromJson(json.get("last_name"), String.class);
@@ -773,9 +844,10 @@ public class DatabaseService {
                 }
                 break;
         }
-        if(!insert) System.out.println("ERROR: Insert error, fields " + fields.toString());
+        if (!insert) System.out.println("ERROR: Insert error, fields " + fields.toString());
         return insert;
     }
+
     private static String getLowStr(Enum e) {
         return e.name().toLowerCase();
     }
@@ -785,11 +857,11 @@ public class DatabaseService {
         JsonParser parser = new JsonParser();
         JsonObject json = parser.parse(ctx.body()).getAsJsonObject();
         String table = gson.fromJson(json.get("table"), String.class);
-        if(!isExistTable(table)) {
+        if (!isExistTable(table)) {
             return sendError("Table " + table + " not exist", ctx.url(), null);
         }
         try {
-            if(!isInsertedInTable(table, json, gson, ds)) {
+            if (!isInsertedInTable(table, json, gson, ds)) {
                 return sendError("Insert in table " + table + " failed", ctx.url(), null);
             } else {
                 return sendSuccess("");
@@ -804,18 +876,19 @@ public class DatabaseService {
         Set<String> fields = json.keySet();
         String city = getLowStr(LocationFields.CITY), country = getLowStr(LocationFields.COUNTRY);
         String id = getLowStr(LocationFields.ID);
-        if(fields.contains(city) && fields.contains(country) && fields.contains(id)) {
+        if (fields.contains(city) && fields.contains(country) && fields.contains(id)) {
             int updAdd = gson.fromJson(json.get("id"), Integer.class);
             String updCountry = gson.fromJson(json.get("country"), String.class);
             String updCity = gson.fromJson(json.get("city"), String.class);
             updateLocation(ds, updAdd, updCountry, updCity);
         }
     }
+
     private void updOrganization(JsonObject json, Gson gson, DataSource ds) {
         Set<String> fields = json.keySet();
         String locationId = getLowStr(OrganizationFields.ID_LOCATION), name = getLowStr(OrganizationFields.NAME);
         String id = getLowStr(OrganizationFields.ID);
-        if(fields.contains(locationId) && fields.contains(name) && fields.contains(id)) {
+        if (fields.contains(locationId) && fields.contains(name) && fields.contains(id)) {
             int updLocationId = gson.fromJson(json.get("id_location"), Integer.class);
             int updId = gson.fromJson(json.get("id"), Integer.class);
             String updName = gson.fromJson(json.get("name"), String.class);
@@ -828,7 +901,7 @@ public class DatabaseService {
         String age = getLowStr(GroupFields.AGE), sex = getLowStr(GroupFields.SEX);
         String weight = getLowStr(GroupFields.WEIGHT), rank = getLowStr(GroupFields.RANK);
         String id = getLowStr(GroupFields.ID);
-        if(fields.contains(age) && fields.contains(sex) && fields.contains(rank)
+        if (fields.contains(age) && fields.contains(sex) && fields.contains(rank)
                 && fields.contains(weight) && fields.contains(id)) {
             int updId = gson.fromJson(json.get("id"), Integer.class);
             int updAge = gson.fromJson(json.get("age"), Integer.class);
@@ -844,7 +917,7 @@ public class DatabaseService {
         String id = getLowStr(ContestFields.ID), dateStart = getLowStr(ContestFields.DATE_START);
         String dateEnd = getLowStr(ContestFields.DATE_END), status = getLowStr(ContestFields.STATUS);
         String organizationId = getLowStr(ContestFields.ID_ORGANIZATION), name = getLowStr(ContestFields.NAME);
-        if(fields.contains(id) && fields.contains(dateEnd) && fields.contains(dateStart)
+        if (fields.contains(id) && fields.contains(dateEnd) && fields.contains(dateStart)
                 && fields.contains(organizationId) && fields.contains(name) && fields.contains(status)) {
             int updId = gson.fromJson(json.get("id"), Integer.class);
             int updOrganizationId = gson.fromJson(json.get("id_organization"), Integer.class);
@@ -864,7 +937,7 @@ public class DatabaseService {
         String id = getLowStr(JudgeFields.ID);
         String contestId = getLowStr(JudgeFields.ID_CONTEST);
         String organizationId = getLowStr(JudgeFields.ID_ORGANIZATION);
-        if(fields.contains(secondName) && fields.contains(firstName) && fields.contains(lastName)
+        if (fields.contains(secondName) && fields.contains(firstName) && fields.contains(lastName)
                 && fields.contains(id) && fields.contains(organizationId) && fields.contains(contestId)) {
             String updSName = gson.fromJson(json.get("second_name"), String.class);
             String updFName = gson.fromJson(json.get("first_name"), String.class);
@@ -872,7 +945,7 @@ public class DatabaseService {
             int updId = gson.fromJson(json.get("id"), Integer.class);
             int updContestId = gson.fromJson(json.get("id_contest"), Integer.class);
             int updOrganizationId = gson.fromJson(json.get("id_organization"), Integer.class);
-            updateJudge(ds, updId,updSName, updFName, updLName, updOrganizationId, updContestId);
+            updateJudge(ds, updId, updSName, updFName, updLName, updOrganizationId, updContestId);
         }
     }
 
@@ -885,9 +958,9 @@ public class DatabaseService {
         String id = getLowStr(GroupFields.ID);
         String memberId = getLowStr(InfringementFields.ID_MEMBER);
 
-        if(fields.contains(description) && fields.contains(judgeId) && fields.contains(infrDate)
+        if (fields.contains(description) && fields.contains(judgeId) && fields.contains(infrDate)
                 && fields.contains(comment) && fields.contains(memberId) && fields.contains(id)) {
-            Date updInfrDate = new java.sql.Date(formatter.parse(gson.fromJson(json.get("infr_date"), String.class)).getTime() + DAY);
+            Date updInfrDate = new java.sql.Date(formatter.parse(gson.fromJson(json.get("infr_date"), String.class)).getTime());
             int updId = gson.fromJson(json.get("id"), Integer.class);
             int updJudgeId = gson.fromJson(json.get("id_judge"), Integer.class);
             int updMemberId = gson.fromJson(json.get("id_member"), Integer.class);
@@ -896,11 +969,12 @@ public class DatabaseService {
             updateInfringement(ds, updId, updDescription, updJudgeId, updInfrDate, updComment, updMemberId);
         }
     }
+
     private void updResult(JsonObject json, Gson gson, DataSource ds) {
         Set<String> fields = json.keySet();
         String contestId = getLowStr(ResultFields.ID_CONTEST), place = getLowStr(ResultFields.PLACE);
         String id = getLowStr(ResultFields.ID), points = getLowStr(ResultFields.POINTS);
-        if(fields.contains(contestId) && fields.contains(points) && fields.contains(id) && fields.contains(place)) {
+        if (fields.contains(contestId) && fields.contains(points) && fields.contains(id) && fields.contains(place)) {
             int updContestId = gson.fromJson(json.get("id_contest"), Integer.class);
             int updPlace = gson.fromJson(json.get("place"), Integer.class);
             int updId = gson.fromJson(json.get("id"), Integer.class);
@@ -912,15 +986,15 @@ public class DatabaseService {
     private void updMember(JsonObject json, Gson gson, DataSource ds) {
         Set<String> fields = json.keySet();
         String secondName = getLowStr(MemberFields.SECOND_NAME),
-            firstName = getLowStr(MemberFields.FIRST_NAME),
-            lastName = getLowStr(MemberFields.LAST_NAME),
-            id = getLowStr(JudgeFields.ID),
-            number = getLowStr(MemberFields.NUMBER),
-            contestId = getLowStr(MemberFields.ID_CONTEST),
-            resultId = getLowStr(MemberFields.ID_RESULT),
-            groupId = getLowStr(MemberFields.ID_GROUP),
-            organizationId = getLowStr(MemberFields.ID_ORGANIZATION);
-        if(fields.contains(secondName) && fields.contains(firstName) && fields.contains(lastName)
+                firstName = getLowStr(MemberFields.FIRST_NAME),
+                lastName = getLowStr(MemberFields.LAST_NAME),
+                id = getLowStr(JudgeFields.ID),
+                number = getLowStr(MemberFields.NUMBER),
+                contestId = getLowStr(MemberFields.ID_CONTEST),
+                resultId = getLowStr(MemberFields.ID_RESULT),
+                groupId = getLowStr(MemberFields.ID_GROUP),
+                organizationId = getLowStr(MemberFields.ID_ORGANIZATION);
+        if (fields.contains(secondName) && fields.contains(firstName) && fields.contains(lastName)
                 && fields.contains(id) && fields.contains(organizationId) && fields.contains(contestId)
                 && fields.contains(number) && fields.contains(resultId) && fields.contains(groupId)) {
             int updId = gson.fromJson(json.get("id"), Integer.class);
@@ -935,25 +1009,119 @@ public class DatabaseService {
             updateMember(ds, updId, updResultId, updSName, updFName, updLName, updNumber, updContestId, updOrganizationId, updGroupId);
         }
     }
+
     public String updateEntity(DataSource ds, Context ctx) throws ParseException {
         Gson gson = new Gson();
         JsonParser parser = new JsonParser();
         JsonObject json = parser.parse(ctx.body()).getAsJsonObject();
         String table = gson.fromJson(json.get("table"), String.class);
-        if(!isExistTable(table)) {
+        if (!isExistTable(table)) {
             return sendError("Table " + table + " not exist", ctx.url(), null);
         }
         switch (Tables.valueOf(table.toUpperCase())) {
-            case LOCATION: updLocation(json, gson, ds); break;
-            case ORGANIZATION: updOrganization(json, gson, ds); break;
-            case GROUP: updGroup(json, gson, ds); break;
-            case CONTEST: updContest(json, gson, ds); break;
-            case JUDGE: updJudge(json, gson, ds); break;
-            case INFRINGEMENT: updInfringement(json, gson, ds); break;
-            case RESULT: updResult(json, gson, ds); break;
-            case MEMBER: updMember(json, gson, ds); break;
+            case LOCATION:
+                updLocation(json, gson, ds);
+                break;
+            case ORGANIZATION:
+                updOrganization(json, gson, ds);
+                break;
+            case GROUP:
+                updGroup(json, gson, ds);
+                break;
+            case CONTEST:
+                updContest(json, gson, ds);
+                break;
+            case JUDGE:
+                updJudge(json, gson, ds);
+                break;
+            case INFRINGEMENT:
+                updInfringement(json, gson, ds);
+                break;
+            case RESULT:
+                updResult(json, gson, ds);
+                break;
+            case MEMBER:
+                updMember(json, gson, ds);
+                break;
         }
         return sendSuccess("update");
+    }
+
+    private void rmResult(JsonObject json, Gson gson, DataSource ds) {
+        int removeId = gson.fromJson(json.get("id"), Integer.class);
+        removeResult(ds, removeId);
+    }
+
+    private void rmMember(JsonObject json, Gson gson, DataSource ds) {
+        int removeId = gson.fromJson(json.get("id"), Integer.class);
+        removeMember(ds, removeId);
+    }
+
+    private void rmLocation(JsonObject json, Gson gson, DataSource ds) {
+        int removeId = gson.fromJson(json.get("id"), Integer.class);
+        removeLocation(ds, removeId);
+    }
+
+    private void rmOrganization(JsonObject json, Gson gson, DataSource ds) {
+        int removeId = gson.fromJson(json.get("id"), Integer.class);
+        removeOrganization(ds, removeId);
+    }
+
+    private void rmGroup(JsonObject json, Gson gson, DataSource ds) {
+        int removeId = gson.fromJson(json.get("id"), Integer.class);
+        removeGroup(ds, removeId);
+    }
+
+    private void rmContest(JsonObject json, Gson gson, DataSource ds) {
+        int removeId = gson.fromJson(json.get("id"), Integer.class);
+        removeContest(ds, removeId);
+    }
+
+    private void rmJudge(JsonObject json, Gson gson, DataSource ds) {
+        int removeId = gson.fromJson(json.get("id"), Integer.class);
+        removeJudge(ds, removeId);
+    }
+
+    private void rmInfringement(JsonObject json, Gson gson, DataSource ds) {
+        int removeId = gson.fromJson(json.get("id"), Integer.class);
+        removeInfringement(ds, removeId);
+    }
+
+    public String removeEntity(DataSource ds, Context ctx) throws ParseException {
+        Gson gson = new Gson();
+        JsonParser parser = new JsonParser();
+        JsonObject json = parser.parse(ctx.body()).getAsJsonObject();
+        String table = gson.fromJson(json.get("table"), String.class);
+        if (!isExistTable(table)) {
+            return sendError("Table " + table + " not exist", ctx.url(), null);
+        }
+        switch (Tables.valueOf(table.toUpperCase())) {
+            case LOCATION:
+                rmLocation(json, gson, ds);
+                break;
+            case ORGANIZATION:
+                rmOrganization(json, gson, ds);
+                break;
+            case GROUP:
+                rmGroup(json, gson, ds);
+                break;
+            case CONTEST:
+                rmContest(json, gson, ds);
+                break;
+            case JUDGE:
+                rmJudge(json, gson, ds);
+                break;
+            case INFRINGEMENT:
+                rmInfringement(json, gson, ds);
+                break;
+            case RESULT:
+                rmResult(json, gson, ds);
+                break;
+            case MEMBER:
+                rmMember(json, gson, ds);
+                break;
+        }
+        return sendSuccess("remove");
     }
 }
 

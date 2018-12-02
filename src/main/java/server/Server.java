@@ -42,12 +42,12 @@ public class Server {
         javalin.get("/api/getTables", ctx -> ctx.result(dbService.getTables(dbService.getDataSource())));
         javalin.post("/api/addEntity", ctx -> ctx.result(dbService.addEntity(dbService.getDataSource(), ctx)));
         javalin.post("/api/updateEntity", ctx -> ctx.result(dbService.updateEntity(dbService.getDataSource(), ctx)));
-//        javalin.post("/api/removeEntity", ctx -> ctx.result(dbService.removeEntity(dbService.getDataSource(), ctx)));
+        javalin.post("/api/removeEntity", ctx -> ctx.result(dbService.removeEntity(dbService.getDataSource(), ctx)));
 
         //отобразить топ
         //предсказывать победителей
 
-        Arrays.asList("/add", "/edit/:table/:id", "/remove").forEach(path ->
+        Arrays.asList("/add", "/edit/:table/:id").forEach(path ->
             javalin.get(path, ctx -> ctx.renderThymeleaf("/client/react-redux/dist/index.html"))
         );
 
