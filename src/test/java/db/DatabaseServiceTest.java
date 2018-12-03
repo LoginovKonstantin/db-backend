@@ -8,6 +8,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -61,17 +62,8 @@ public class DatabaseServiceTest {
     }
 
     @Test
-    public void testFillDatabase() {
-
-        try {
-            dbService.fillTestDataToDataBase(dbService.getDataSource());
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
-
-//        dbService.insertIntoGroup(dbService.getDataSource(), 18, 1, 85.5f, "MS");
-
-//        DataSource ds = dbService.getDataSource();
+    public void testFillDatabase() throws ParseException {
+        dbService.testFillDataBase(dbService.getDataSource());
     }
 
     @Test

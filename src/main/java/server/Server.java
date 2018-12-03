@@ -7,6 +7,9 @@ import db.DatabaseService;
 import io.javalin.Javalin;
 import org.apache.log4j.PropertyConfigurator;
 
+import java.io.IOException;
+import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.Arrays;
 
 import static server.Configuration.LOG4J_CONF_PATH;
@@ -14,7 +17,7 @@ import static server.Configuration.SERVER_PORT;
 
 public class Server {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException, IOException {
         PropertyConfigurator.configure(LOG4J_CONF_PATH);
         Configuration config = new Configuration();
         DatabaseService dbService = new DatabaseService(
@@ -26,11 +29,7 @@ public class Server {
         );
 //        dbService.tryDropDatabase(dbService.getDataSource());
 //        dbService.tryCreateDatabase(dbService.getDataSource());
-//        try {
-//            dbService.fillTestDataToDataBase(dbService.getDataSource());
-//        } catch (ParseException e) {
-//            e.printStackTrace();
-//        }
+        dbService.fillDataBase(dbService.getDataSource());
 
         Javalin javalin = Javalin
                 .create()

@@ -9,6 +9,7 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import javax.sql.DataSource;
+import java.io.*;
 import java.sql.*;
 import java.sql.Date;
 import java.text.DateFormat;
@@ -630,8 +631,27 @@ public class DatabaseService {
         }
     }
 
-    public void fillTestDataToDataBase(DataSource dataSource) throws ParseException {
+    public void fillDataBase(DataSource dataSource) throws IOException, SQLException {
+        ScriptRunner runner = new ScriptRunner(ds.getConnection(), false, true);
+
+//        conn.prepareStatement(createJudge).execute();
+//        conn.prepareStatement(createMember).execute();
+//        conn.prepareStatement(createInfringement).execute();
+
+        runner.runScript(new FileReader("src/main/resources/sql/fill_location.sql"));
+        runner.runScript(new FileReader("src/main/resources/sql/fill_organization.sql"));
+        runner.runScript(new FileReader("src/main/resources/sql/fill_group.sql"));
+        runner.runScript(new FileReader("src/main/resources/sql/fill_contest.sql"));
+        runner.runScript(new FileReader("src/main/resources/sql/fill_result.sql"));
+
+//        runner.runScript(new FileReader("src/main/resources/sql/fill_infringement.sql"));
+//        runner.runScript(new FileReader("src/main/resources/sql/fill_judge.sql"));
+//        runner.runScript(new FileReader("src/main/resources/sql/fill_member.sql"));
+    }
+
+    public void testFillDataBase(DataSource dataSource) throws ParseException {
         DataSource ds = dataSource;
+
         insertIntoLocation(ds, "Russia", "Perm");
         insertIntoLocation(ds, "Russia", "Moscow");
         insertIntoLocation(ds, "Spain", "Madrid");
