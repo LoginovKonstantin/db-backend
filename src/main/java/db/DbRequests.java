@@ -182,4 +182,13 @@ class DbRequests {
     static String removeMember = "DELETE FROM member WHERE id = ?";
     static String getMember = "SELECT * FROM member";
 
+
+    //GET TOP N
+    static String getTopByOrganization = "SELECT * FROM member INNER JOIN result ON (member.id_result = result.id) " +
+            "WHERE id_organization = ? GROUP_BY member.id ORDER BY result.points DESC limit ?";
+    static String getTopByGroup = "SELECT * FROM member INNER JOIN result ON (member.id_result = result.id) " +
+            "WHERE id_group = ? GROUP_BY member.id ORDER BY result.points DESC limit ?";
+    static String getTopByContest= "SELECT * FROM member INNER JOIN result ON (member.id_result = result.id) " +
+            "WHERE member.id_contest = ? GROUP_BY member.id ORDER BY result.points DESC limit ?";
+
 }

@@ -19,6 +19,7 @@ import java.util.*;
 
 import static db.DbRequests.*;
 import static server.Configuration.FORMAT_DATE;
+import static server.Configuration.TOP_COUNT;
 import static server.Server.sendError;
 import static server.Server.sendSuccess;
 
@@ -632,64 +633,56 @@ public class DatabaseService {
     }
 
     public void fillDataBase(DataSource dataSource) throws IOException, SQLException {
-        ScriptRunner runner = new ScriptRunner(ds.getConnection(), false, true);
-
-//        conn.prepareStatement(createJudge).execute();
-//        conn.prepareStatement(createMember).execute();
-//        conn.prepareStatement(createInfringement).execute();
-
+        ScriptRunner runner = new ScriptRunner(dataSource.getConnection(), false, true);
         runner.runScript(new FileReader("src/main/resources/sql/fill_location.sql"));
         runner.runScript(new FileReader("src/main/resources/sql/fill_organization.sql"));
         runner.runScript(new FileReader("src/main/resources/sql/fill_group.sql"));
         runner.runScript(new FileReader("src/main/resources/sql/fill_contest.sql"));
         runner.runScript(new FileReader("src/main/resources/sql/fill_result.sql"));
-
-//        runner.runScript(new FileReader("src/main/resources/sql/fill_infringement.sql"));
-//        runner.runScript(new FileReader("src/main/resources/sql/fill_judge.sql"));
-//        runner.runScript(new FileReader("src/main/resources/sql/fill_member.sql"));
+        runner.runScript(new FileReader("src/main/resources/sql/fill_member.sql"));
+        runner.runScript(new FileReader("src/main/resources/sql/fill_judge.sql"));
+        runner.runScript(new FileReader("src/main/resources/sql/fill_infringement.sql"));
     }
 
     public void testFillDataBase(DataSource dataSource) throws ParseException {
-        DataSource ds = dataSource;
+        insertIntoLocation(dataSource, "Russia", "Perm");
+        insertIntoLocation(dataSource, "Russia", "Moscow");
+        insertIntoLocation(dataSource, "Spain", "Madrid");
 
-        insertIntoLocation(ds, "Russia", "Perm");
-        insertIntoLocation(ds, "Russia", "Moscow");
-        insertIntoLocation(ds, "Spain", "Madrid");
+        int mskLocation = getLocationByCountryAndCity(dataSource, "Russia", "Moscow").getId();
+        int prmLocation = getLocationByCountryAndCity(dataSource, "Russia", "Perm").getId();
+        int mdrdLocation = getLocationByCountryAndCity(dataSource, "Spain", "Madrid").getId();
 
-        int mskLocation = getLocationByCountryAndCity(ds, "Russia", "Moscow").getId();
-        int prmLocation = getLocationByCountryAndCity(ds, "Russia", "Perm").getId();
-        int mdrdLocation = getLocationByCountryAndCity(ds, "Spain", "Madrid").getId();
+        insertIntoOrganization(dataSource, "MskSportSchool", mskLocation);
+        insertIntoOrganization(dataSource, "PrmSportSchool", prmLocation);
+        insertIntoOrganization(dataSource, "MdrdSportSchool", mdrdLocation);
 
-        insertIntoOrganization(ds, "MskSportSchool", mskLocation);
-        insertIntoOrganization(ds, "PrmSportSchool", prmLocation);
-        insertIntoOrganization(ds, "MdrdSportSchool", mdrdLocation);
+        insertIntoGroup(dataSource, 18, 1, 85.5f, "MS");
+        insertIntoGroup(dataSource, 18, 0, 65.5f, "MS");
 
-        insertIntoGroup(ds, 18, 1, 85.5f, "MS");
-        insertIntoGroup(ds, 18, 0, 65.5f, "MS");
-
-        int mskOrg = getOrganizationByName(ds, "MskSportSchool").getId();
-        int prmOrg = getOrganizationByName(ds, "PrmSportSchool").getId();
-        int mdrdOrg = getOrganizationByName(ds, "MdrdSportSchool").getId();
+        int mskOrg = getOrganizationByName(dataSource, "MskSportSchool").getId();
+        int prmOrg = getOrganizationByName(dataSource, "PrmSportSchool").getId();
+        int mdrdOrg = getOrganizationByName(dataSource, "MdrdSportSchool").getId();
 
         DateFormat formatter = new SimpleDateFormat(FORMAT_DATE);
-        insertIntoContest(ds, "First Winner Games", new java.sql.Date(formatter.parse("01/01/19").getTime()), new java.sql.Date(formatter.parse("07/01/19").getTime()), "Not started", prmOrg);
-        insertIntoContest(ds, "Second Winner Games", new java.sql.Date(formatter.parse("23/02/19").getTime()), new java.sql.Date(formatter.parse("27/02/19").getTime()), "Not started", mdrdOrg);
+        insertIntoContest(dataSource, "First Winner Games", new java.sql.Date(formatter.parse("01/01/19").getTime()), new java.sql.Date(formatter.parse("07/01/19").getTime()), "Not started", prmOrg);
+        insertIntoContest(dataSource, "Second Winner Games", new java.sql.Date(formatter.parse("23/02/19").getTime()), new java.sql.Date(formatter.parse("27/02/19").getTime()), "Not started", mdrdOrg);
 
-        int firstContest = getContest(ds, "First Winner Games").getId();
-        int secondContest = getContest(ds, "Second Winner Games").getId();
+        int firstContest = getContest(dataSource, "First Winner Games").getId();
+        int secondContest = getContest(dataSource, "Second Winner Games").getId();
 
-        insertIntoJudge(ds, "Петров", "Максим", "Дмитриевич", mskOrg, firstContest);
-        insertIntoJudge(ds, "Васильев", "Матвей", "Игоревич", prmOrg, firstContest);
-        insertIntoJudge(ds, "Lesley", "Ann", "Warren", mdrdOrg, secondContest);
-        insertIntoJudge(ds, "Barbara ", "Bel", "Geddes", mdrdLocation, secondContest);
+        insertIntoJudge(dataSource, "Петров", "Максим", "Дмитриевич", mskOrg, firstContest);
+        insertIntoJudge(dataSource, "Васильев", "Матвей", "Игоревич", prmOrg, firstContest);
+        insertIntoJudge(dataSource, "Lesley", "Ann", "Warren", mdrdOrg, secondContest);
+        insertIntoJudge(dataSource, "Barbara ", "Bel", "Geddes", mdrdLocation, secondContest);
 
 //        insertIntoInfringement(ds, "Допинг", null, null, null, null);
 //        insertIntoResult(ds, firstContest, 1, 125.5f);
 
-        insertIntoMember(ds, "Иванов", "Сергей", "Сергей Владимирович", 10, firstContest, mskOrg, 1);
-        insertIntoMember(ds, "Пушкин", "Александр", "Александрович", 11, firstContest, prmOrg, 1);
-        insertIntoMember(ds, "Красавина", "Екатерина", "Андреевна", 100, firstContest, mskOrg, 2);
-        insertIntoMember(ds, "del", "María", "Amparo", 101, firstContest, mdrdOrg, 2);
+        insertIntoMember(dataSource, "Иванов", "Сергей", "Сергей Владимирович", 10, firstContest, mskOrg, 1);
+        insertIntoMember(dataSource, "Пушкин", "Александр", "Александрович", 11, firstContest, prmOrg, 1);
+        insertIntoMember(dataSource, "Красавина", "Екатерина", "Андреевна", 100, firstContest, mskOrg, 2);
+        insertIntoMember(dataSource, "del", "María", "Amparo", 101, firstContest, mdrdOrg, 2);
     }
 
     public String getTables(DataSource ds) {
@@ -1142,6 +1135,129 @@ public class DatabaseService {
                 break;
         }
         return sendSuccess("remove");
+    }
+
+    public String getTopByParams(DataSource ds, Context ctx) {
+//        id_contest, id_group, id_organization
+        Gson gson = new Gson();
+        JsonParser parser = new JsonParser();
+        JsonObject json = parser.parse(ctx.body()).getAsJsonObject();
+
+        Integer idContest = gson.fromJson(json.get("id_contest"), Integer.class);
+        Integer idGroup = gson.fromJson(json.get("id_group"), Integer.class);
+        Integer idOrganization = gson.fromJson(json.get("id_organization"), Integer.class);
+
+        if (idContest != null && idGroup != null && idOrganization != null) {
+
+        } else if (idContest != null && idGroup != null) {
+
+        } else if (idContest != null && idOrganization != null) {
+
+        } else if (idGroup != null && idOrganization != null) {
+
+        } else if (idContest != null) {
+            Map<String, Object> result = new HashMap<>();
+            ArrayList<TopMember> members = getTopByContest(ds, idContest);
+            result.put("members", members);
+            return sendSuccess(result);
+        } else if (idGroup != null) {
+            Map<String, Object> result = new HashMap<>();
+            ArrayList<TopMember> members = getTopByGroup(ds, idGroup);
+            result.put("members", members);
+            return sendSuccess(result);
+        } else if (idOrganization != null) {
+            Map<String, Object> result = new HashMap<>();
+            ArrayList<TopMember> members = getTopByOrganization(ds, idOrganization);
+            result.put("members", members);
+            return sendSuccess(result);
+        } else {
+            return sendError("No fields....", ctx.url(), null);
+        }
+    }
+    private ArrayList<TopMember> getTopByGroupOrg(DataSource dataSource, int groupId, int orgId) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(getTopByContest)) {
+            statement.setInt(1, groupId);
+            statement.setInt(2, orgId);
+            statement.setInt(3, TOP_COUNT);
+            ResultSet rs = statement.executeQuery();
+            ArrayList<TopMember> members = new ArrayList<>();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String secondName = rs.getString("second_name");
+                String firstName = rs.getString("first_name");
+                String lastName = rs.getString("last_name");
+                int place = rs.getInt("place");
+                int points = rs.getInt("points");
+                members.add(new TopMember(id, place, points, secondName, firstName, lastName));
+            }
+            return members;
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+    private ArrayList<TopMember> getTopByContest(DataSource dataSource, int contestId) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(getTopByContest)) {
+            statement.setInt(1, contestId);
+            statement.setInt(2, TOP_COUNT);
+            ResultSet rs = statement.executeQuery();
+            ArrayList<TopMember> members = new ArrayList<>();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String secondName = rs.getString("second_name");
+                String firstName = rs.getString("first_name");
+                String lastName = rs.getString("last_name");
+                int place = rs.getInt("place");
+                int points = rs.getInt("points");
+                members.add(new TopMember(id, place, points, secondName, firstName, lastName));
+            }
+            return members;
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+    private ArrayList<TopMember> getTopByGroup(DataSource dataSource, int groupId) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(getTopByGroup)) {
+            statement.setInt(1, groupId);
+            statement.setInt(2, TOP_COUNT);
+            ResultSet rs = statement.executeQuery();
+            ArrayList<TopMember> members = new ArrayList<>();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String secondName = rs.getString("second_name");
+                String firstName = rs.getString("first_name");
+                String lastName = rs.getString("last_name");
+                int place = rs.getInt("place");
+                int points = rs.getInt("points");
+                members.add(new TopMember(id, place, points, secondName, firstName, lastName));
+            }
+            return members;
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+    private ArrayList<TopMember> getTopByOrganization(DataSource dataSource, int organizationId) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(getTopByOrganization)) {
+            statement.setInt(1, organizationId);
+            statement.setInt(2, TOP_COUNT);
+            ResultSet rs = statement.executeQuery();
+            ArrayList<TopMember> members = new ArrayList<>();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String secondName = rs.getString("second_name");
+                String firstName = rs.getString("first_name");
+                String lastName = rs.getString("last_name");
+                int place = rs.getInt("place");
+                int points = rs.getInt("points");
+                members.add(new TopMember(id, place, points, secondName, firstName, lastName));
+            }
+            return members;
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
 }
 

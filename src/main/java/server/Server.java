@@ -29,7 +29,7 @@ public class Server {
         );
 //        dbService.tryDropDatabase(dbService.getDataSource());
 //        dbService.tryCreateDatabase(dbService.getDataSource());
-        dbService.fillDataBase(dbService.getDataSource());
+//        dbService.fillDataBase(dbService.getDataSource());
 
         Javalin javalin = Javalin
                 .create()
@@ -42,6 +42,7 @@ public class Server {
         javalin.post("/api/addEntity", ctx -> ctx.result(dbService.addEntity(dbService.getDataSource(), ctx)));
         javalin.post("/api/updateEntity", ctx -> ctx.result(dbService.updateEntity(dbService.getDataSource(), ctx)));
         javalin.post("/api/removeEntity", ctx -> ctx.result(dbService.removeEntity(dbService.getDataSource(), ctx)));
+        javalin.post("/api/getTopByParams", ctx -> ctx.result(dbService.getTopByParams(dbService.getDataSource(), ctx)));
 
         //отобразить топ
         //предсказывать победителей
