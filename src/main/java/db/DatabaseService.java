@@ -1138,7 +1138,7 @@ public class DatabaseService {
     }
 
     public String getTopByParams(DataSource ds, Context ctx) {
-//        id_contest, id_group, id_organization
+        //id_contest, id_group, id_organization
         Gson gson = new Gson();
         JsonParser parser = new JsonParser();
         JsonObject json = parser.parse(ctx.body()).getAsJsonObject();
@@ -1147,25 +1147,37 @@ public class DatabaseService {
         Integer idGroup = gson.fromJson(json.get("id_group"), Integer.class);
         Integer idOrganization = gson.fromJson(json.get("id_organization"), Integer.class);
 
-        if (idContest != null && idGroup != null && idOrganization != null) {
-
-        } else if (idContest != null && idGroup != null) {
-
-        } else if (idContest != null && idOrganization != null) {
-
-        } else if (idGroup != null && idOrganization != null) {
-
-        } else if (idContest != null) {
+        if (idContest != 0 && idGroup != 0 && idOrganization != 0) {
+            Map<String, Object> result = new HashMap<>();
+            ArrayList<TopMember> members = getTopByContestGroupOrg(ds, idContest, idGroup, idOrganization);
+            result.put("members", members);
+            return sendSuccess(result);
+        } else if (idContest != 0 && idGroup != 0) {
+            Map<String, Object> result = new HashMap<>();
+            ArrayList<TopMember> members = getTopByGroupContest(ds, idGroup, idContest);
+            result.put("members", members);
+            return sendSuccess(result);
+        } else if (idContest != 0 && idOrganization != 0) {
+            Map<String, Object> result = new HashMap<>();
+            ArrayList<TopMember> members = getTopByOrgContest(ds, idOrganization, idContest);
+            result.put("members", members);
+            return sendSuccess(result);
+        } else if (idGroup != 0 && idOrganization != 0) {
+            Map<String, Object> result = new HashMap<>();
+            ArrayList<TopMember> members = getTopByGroupOrg(ds, idGroup, idOrganization);
+            result.put("members", members);
+            return sendSuccess(result);
+        } else if (idContest != 0) {
             Map<String, Object> result = new HashMap<>();
             ArrayList<TopMember> members = getTopByContest(ds, idContest);
             result.put("members", members);
             return sendSuccess(result);
-        } else if (idGroup != null) {
+        } else if (idGroup != 0) {
             Map<String, Object> result = new HashMap<>();
             ArrayList<TopMember> members = getTopByGroup(ds, idGroup);
             result.put("members", members);
             return sendSuccess(result);
-        } else if (idOrganization != null) {
+        } else if (idOrganization != 0) {
             Map<String, Object> result = new HashMap<>();
             ArrayList<TopMember> members = getTopByOrganization(ds, idOrganization);
             result.put("members", members);
@@ -1174,9 +1186,76 @@ public class DatabaseService {
             return sendError("No fields....", ctx.url(), null);
         }
     }
+    private ArrayList<TopMember> getTopByContestGroupOrg(DataSource dataSource, int contestId, int groupId, int orgId) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(getTopByContestGroupOrg)) {
+            statement.setInt(1, groupId);
+            statement.setInt(2, contestId);
+            statement.setInt(3, orgId);
+            statement.setInt(4, TOP_COUNT);
+            ResultSet rs = statement.executeQuery();
+            ArrayList<TopMember> members = new ArrayList<>();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String secondName = rs.getString("second_name");
+                String firstName = rs.getString("first_name");
+                String lastName = rs.getString("last_name");
+                int place = rs.getInt("place");
+                int points = rs.getInt("points");
+                members.add(new TopMember(id, place, points, secondName, firstName, lastName));
+            }
+            return members;
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+    private ArrayList<TopMember> getTopByGroupContest(DataSource dataSource, int groupId, int contestId) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(getTopByGroupContest)) {
+            statement.setInt(1, groupId);
+            statement.setInt(2, contestId);
+            statement.setInt(3, TOP_COUNT);
+            ResultSet rs = statement.executeQuery();
+            ArrayList<TopMember> members = new ArrayList<>();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String secondName = rs.getString("second_name");
+                String firstName = rs.getString("first_name");
+                String lastName = rs.getString("last_name");
+                int place = rs.getInt("place");
+                int points = rs.getInt("points");
+                members.add(new TopMember(id, place, points, secondName, firstName, lastName));
+            }
+            return members;
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
+    private ArrayList<TopMember> getTopByOrgContest(DataSource dataSource, int organizationId, int contestId) {
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement statement = conn.prepareStatement(getTopByOrganizationContest)) {
+            statement.setInt(1, organizationId);
+            statement.setInt(2, contestId);
+            statement.setInt(3, TOP_COUNT);
+            ResultSet rs = statement.executeQuery();
+            ArrayList<TopMember> members = new ArrayList<>();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String secondName = rs.getString("second_name");
+                String firstName = rs.getString("first_name");
+                String lastName = rs.getString("last_name");
+                int place = rs.getInt("place");
+                int points = rs.getInt("points");
+                members.add(new TopMember(id, place, points, secondName, firstName, lastName));
+            }
+            return members;
+        } catch (SQLException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+    }
     private ArrayList<TopMember> getTopByGroupOrg(DataSource dataSource, int groupId, int orgId) {
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement statement = conn.prepareStatement(getTopByContest)) {
+             PreparedStatement statement = conn.prepareStatement(getTopByGroupAndOrganization)) {
             statement.setInt(1, groupId);
             statement.setInt(2, orgId);
             statement.setInt(3, TOP_COUNT);
