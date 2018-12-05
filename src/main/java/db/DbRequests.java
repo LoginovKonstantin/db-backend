@@ -191,14 +191,14 @@ class DbRequests {
     static String getTopByContest= "SELECT * FROM member INNER JOIN result ON (member.id_result = result.id) " +
             "WHERE member.id_contest = ? GROUP BY member.id ORDER BY result.points DESC limit ?";
 
-    static String getTopByGroupAndOrganization = "SELECT * FROM sport_games.member INNER JOIN sport_games.result ON (member.id_result = result.id) " +
+    static String getTopByGroupAndOrganization = "SELECT * FROM member INNER JOIN result ON (member.id_result = result.id) " +
             "WHERE (member.id_group = ? && member.id_organization = ?)  GROUP BY member.id ORDER BY result.points DESC limit ?";
-    static String getTopByOrganizationContest = "SELECT * FROM sport_games.member INNER JOIN sport_games.result ON (member.id_result = result.id) " +
+    static String getTopByOrganizationContest = "SELECT * FROM member INNER JOIN result ON (member.id_result = result.id) " +
             "WHERE (member.id_organization = ? && member.id_contest = ?)  GROUP BY member.id ORDER BY result.points DESC limit ?";
-    static String getTopByGroupContest = "SELECT * FROM sport_games.member INNER JOIN sport_games.result ON (member.id_result = result.id) " +
+    static String getTopByGroupContest = "SELECT * FROM member INNER JOIN result ON (member.id_result = result.id) " +
             "WHERE (member.id_group = ? && member.id_contest = ?)  GROUP BY member.id ORDER BY result.points DESC limit ?";
 
-    static String getTopByContestGroupOrg = "SELECT * FROM sport_games.member INNER JOIN sport_games.result ON (member.id_result = result.id) " +
+    static String getTopByContestGroupOrg = "SELECT * FROM member INNER JOIN result ON (member.id_result = result.id) " +
             "WHERE (member.id_group = ? && member.id_contest = ? && member.id_organization = ?)  GROUP BY member.id ORDER BY result.points DESC limit ?";
 
 }
